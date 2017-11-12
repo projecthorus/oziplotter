@@ -16,6 +16,7 @@ The following software has been designed to produce data in this format, and is 
 [OziMux](https://github.com/projecthorus/HorusGroundStation/blob/master/OziMux.py), part of the HorusGroundStation repository, was developed as a means to switch between different data sources during a flight. For example, if you have a LoRa and a RTTY payload, you can switch between the two payloads depending on which is producing the most consistent/reliable data.
 
 OziMux listens for telemetry data (in the same format as above) on multiple UDP ports (configured in ozimux.cfg), displays the received data, and allows the user to select which data source should be passed onto OziPlotter.
+
 An example configuration for OziMux is provided in [ozimux.cfg.example](https://github.com/projecthorus/HorusGroundStation/blob/master/ozimux.cfg.example), and must be copied to ozimux.cfg before running the program. 
 
 By default, OziMux listens for telemetry on the following UDP ports:
@@ -23,6 +24,7 @@ By default, OziMux listens for telemetry on the following UDP ports:
 * 55681 - Radiosonde Auto RX
 * 55682 - SondeMonitor Bridge (will eventually be removed, telemetry produced by sonde_to_habitat.py from [here](https://github.com/darksidelemm/sondemonitorUtils))
 * 55683 - Fldigi Bridge
+
 See below for more information on these data sources.
 
 ![OziMux Screenshot](https://raw.githubusercontent.com/projecthorus/oziplotter/master/doc/images/ozimux.jpg)
