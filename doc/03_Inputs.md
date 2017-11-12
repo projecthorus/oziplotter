@@ -5,10 +5,12 @@ The following formats are accepted:
 * Payload Positions:  `TELEMETRY,HH:MM:SS,latitude,longitude,altitude\n` 
   * Example: `TELEMETRY,01:05:20,-34.12345,138.12345,10123\n`
   * Payload positions are added to a track within OziExplorer.
+  * The time (in HH:MM:SS format) should be the time the telemetry was received, and must be in UTC time, in the current UTC day. This time information is used to calculate ascent/descent rates, and feeds into the predictor.
 
 * Waypoint data: `WAYPOINT,name,latitude,longitude,comment\n`
   * Example: `WAYPOINT,VK5QI-9,-34.12345,138.1234,QSY 439.900\n`
-  * Waypoints are plotted in OziExplorer, and are referenced by name. Hence, they can be updated by sending a new Waypoint data sentence with the same waypoint name.
+  * Waypoints are plotted in OziExplorer, and are referenced by name. Hence, they can be updated by sending a new Waypoint data sentence with the same waypoint name. 
+  * Waypoints cannot currently be deleted (TODO!)
 
 The following software has been designed to produce data in this format, and is suitable for gathering payload telemetry from various sources:
 
@@ -30,9 +32,12 @@ See below for more information on these data sources.
 ![OziMux Screenshot](https://raw.githubusercontent.com/projecthorus/oziplotter/master/doc/images/ozimux.jpg)
 
 ## FldigiBridge
-[FldigiBridge](https://github.com/projecthorus/HorusGroundStation/blob/master/FldigiBridge.py), part of the HorusGroundStation repository, connects to ['dl-fldigi'](https://ukhas.org.uk/projects:dl-fldigi), and listens for telemetry in the [UKHAS standard format](https://ukhas.org.uk/communication:protocol). The telemetry string must use a CRC16 checksum. 
+[FldigiBridge](https://github.com/projecthorus/HorusGroundStation/blob/master/FldigiBridge.py), part of the HorusGroundStation repository, connects to ['dl-fldigi'](https://ukhas.org.uk/projects:dl-fldigi), and listens for telemetry in the [UKHAS standard format](https://ukhas.org.uk/communication:protocol). 
 
-FldigiBridge cares not what modulation scheme (RTTY, or otherwise) your payload is using - it just reads the decoded data out of dl-fldigi via a TCP connection. 
+The telemetry string must use a CRC16 checksum, and have the following first format:
+* `$$CALLSIGN,sentence_id,time,latitude,longitude,altitude,other_data_here*CRC16\n`
+
+FldigiBridge cares not what modulation scheme (RTTY, or otherwise) your payload is using - it just reads the decoded data out of dl-fldigi via a TCP connection. Time/latitude/longitude/altitude are extracted and passed on if the checksum is valid.
 
 By default, FldigiBridge outputs data to UDP port 55683, which is a default setting within OziMux.
 

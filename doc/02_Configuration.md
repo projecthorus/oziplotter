@@ -20,6 +20,5 @@ Refer to the [documentation for get_wind_data.py](https://github.com/projecthoru
 
 Refer to ['OziPlotter.conf'](../OziPlotter.conf) for other customizable parameters.
 
-
 Next: [Data Inputs](./03_Inputs.md)
 
