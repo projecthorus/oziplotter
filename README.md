@@ -4,7 +4,7 @@ OziPlotter was designed as a means of plotting balloon payload position & flight
 
 ![Chasing a radiosonde..](https://raw.githubusercontent.com/projecthorus/oziplotter/master/doc/images/sonde_chase.jpg)
 
-This software was originally written by Terry Baume, Project Horus's founder, and has been in various states of development since 2009. The core of OziPlotter is written in Java, but the Horus Ground Station utilities and other scripts are written in Python.
+This software was originally written by Terry Baume, Project Horus's founder, and has been in various states of development since 2009. The core of OziPlotter is written in Java, but the Horus Ground Station utilities and other scripts are written in Python. 
 
 OziPlotter performs the following functions:
 * Listens for payload telemetry data from various sources via simple UDP packets, and plots the payload position on the map.

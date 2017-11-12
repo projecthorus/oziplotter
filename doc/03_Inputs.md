@@ -17,7 +17,7 @@ The following software has been designed to produce data in this format, and is 
 
 OziMux listens for telemetry data (in the same format as above) on multiple UDP ports (configured in ozimux.cfg), displays the received data, and allows the user to select which data source should be passed onto OziPlotter.
 
-TODO: Screenshot
+![OziMux Screenshot](https://raw.githubusercontent.com/projecthorus/oziplotter/master/doc/images/ozimux.jpg)
 
 ## FldigiBridge
 [FldigiBridge](https://github.com/projecthorus/HorusGroundStation/blob/master/FldigiBridge.py), part of the HorusGroundStation repository, connects to ['dl-fldigi'](https://ukhas.org.uk/projects:dl-fldigi), and listens for telemetry in the [UKHAS standard format](https://ukhas.org.uk/communication:protocol). The telemetry string must use a CRC16 checksum. 
@@ -26,21 +26,22 @@ FldigiBridge cares not what modulation scheme (RTTY, or otherwise) your payload 
 
 By default, FldigiBridge outputs data to UDP port 55683, which is a default setting within OziMux.
 
-TODO: Screenshot
+![Fldigi Bridge Screenshot](https://raw.githubusercontent.com/projecthorus/oziplotter/master/doc/images/fldigibridge.jpg)
 
 ## Horus Ground Station
 [HorusGroundStation](https://github.com/projecthorus/HorusGroundStation/blob/master/HorusGroundStation.py) is the GUI interface for Project Horus's 'mission control' [telemetry payload](https://github.com/projecthorus/FlexTrack-Horus), which communicates via the LoRa modulation scheme. Refer to the [HorusGroundStation](https://github.com/projecthorus/HorusGroundStation) repository for further information on this system. 
 
 The port which HorusGroundStation sends data to is configured within [defaults.cfg](https://github.com/projecthorus/HorusGroundStation/blob/master/defaults.cfg.example#L29), and can be set to either communicate directly with OziPlotter, or via OziMux.
 
-TODO: Screenshot
+![Horus Ground Station Screenshot](https://raw.githubusercontent.com/projecthorus/oziplotter/master/doc/images/horusgroundstation.jpg)
 
 ## Radiosonde Auto RX
 Along with launching our own High Altitude balloons, we also go hunting radiosondes launched by the local Bureau of Meteorology. The ['auto_rx' radiosonde decoding software](https://github.com/darksidelemm/RS/tree/master/auto_rx) uses a RTLSDR to automatically search for radiosonde transmissions, decodes them, and plots data to APRS-IS and the [Habitat online tracker](http://tracker.habhub.org). It can also output data in OziPlotter compatible format!
 
 The OziPlotter output must be enabled in the [auto_rx configuration file](https://github.com/darksidelemm/RS/blob/master/auto_rx/station.cfg.example#L85). As with the above applications, you can either push data directly to OziPlotter, or via OziMux. As auto_rx is intended to run on a standalone Raspberry Pi, you will need to specify both the destination IP address, and the destination UDP port (either 8942, or 55681, if sending via OziMux).
 
-TODO: Screenshot
+
+
 
 Next: [Chasing a balloon!](./04_The_Chase.md)
 
