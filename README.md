@@ -1,5 +1,5 @@
 # OziPlotter - Project Horus's Offline Balloon Tracking System
-OziPlotter is an interface between [Project Horus's](www.areg.org.au/archives/category/activities/project-horus) ['Horus Ground Station'](https://github.com/projecthorus/HorusGroundStation) receiver utilities and the (OziExplorer)[http://www.oziexplorer.com/au/] mapping software.
+OziPlotter is an interface between [Project Horus's](www.areg.org.au/archives/category/activities/project-horus) ['Horus Ground Station'](https://github.com/projecthorus/HorusGroundStation) receiver utilities and the [OziExplorer](http://www.oziexplorer.com/au/) mapping software.
 OziPlotter was designed as a means of plotting balloon payload position & flight path predictions on a map, without requiring an internet connection. This is quite important when chasing balloons in remote areas of Australia!
 
 This software was originally written by Terry Baume, Project Horus's founder, and has been in various states of development since 2009. The core of OziPlotter is written in Java, but the Horus Ground Station utilities and other scripts are written in Python.
