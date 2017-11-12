@@ -15,7 +15,7 @@ Refer to the [documentation for get_wind_data.py](https://github.com/projecthoru
 
 * PREDASC - The planned ascent rate for your flight, in m/s. Once the payload has launched, the measured ascent rate based on telemetry will be used.
 * PREDDESC - The planned descent rate for your flight (at sea level), in m/s. The [Random Engineering descent rate calculator](http://www.randomengineering.co.uk/Random_Aerospace/Parachutes.html) can help in estimating this value. Once the payload has burst the measured descent rate (extrapolated to sea level) will be used.
-* PREDBRUST - The predicted burst altitude for your flight.
+* PREDBURST - The predicted burst altitude for your flight.
 * LAUNCHLAT / LAUNCHLON - The lat/long of your launch site. These values are only used to plot a waypoint on the map.
 
 Refer to ['OziPlotter.conf'](../OziPlotter.conf) for other customizable parameters.
