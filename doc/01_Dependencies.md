@@ -54,6 +54,19 @@ Franson GPSGate allows splitting of a connected GPS unit (accessed via a serial 
 * Setup GPSGate to split hardware GPS unit into two virtual COM ports (ideally COM10 and COM11)
  * One can be used for OziExplorer, one for ChaseTracker
 
+## Final contents of ./bin/
+Once you've done all of the above, you should have the following files within `./bin/`:
+* OziAPI.dll
+* OziAPI.jar
+* OziAPIJava.dll
+* cyggcc_s-1.dll
+* cygglib-2.0-0.dll
+* cygiconv-2.dll
+* cygintl-8.dll
+* cygpcre-0.dll
+* cygwin1.dll
+* pred.exe
+
 ## Compilation of OziPlotter
 * Enter the `./src/` directory and run `make.bat`.
 * If all went well, you will just see 'Press any key to continue....'
