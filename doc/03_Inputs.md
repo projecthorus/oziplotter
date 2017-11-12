@@ -20,7 +20,9 @@ OziMux listens for telemetry data (in the same format as above) on multiple UDP 
 TODO: Screenshot
 
 ## FldigiBridge
-[FldigiBridge](https://github.com/projecthorus/HorusGroundStation/blob/master/FldigiBridge.py), part of the HorusGroundStation repository, connects to 'dl-fldigi', and listens for telemetry in the [UKHAS standard format](https://ukhas.org.uk/communication:protocol). The telemetry string must use a CRC16 checksum. 
+[FldigiBridge](https://github.com/projecthorus/HorusGroundStation/blob/master/FldigiBridge.py), part of the HorusGroundStation repository, connects to ['dl-fldigi'](https://ukhas.org.uk/projects:dl-fldigi), and listens for telemetry in the [UKHAS standard format](https://ukhas.org.uk/communication:protocol). The telemetry string must use a CRC16 checksum. 
+
+FldigiBridge cares not what modulation scheme (RTTY, or otherwise) your payload is using - it just reads the decoded data out of dl-fldigi via a TCP connection. 
 
 By default, FldigiBridge outputs data to UDP port 55683, which is a default setting within OziMux.
 

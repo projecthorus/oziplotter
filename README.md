@@ -10,6 +10,8 @@ OziPlotter performs the following functions:
 * Listens for payload telemetry data from various sources via simple UDP packets, and plots the payload position on the map.
 * Runs balloon flight path predictions using saved wind model data, and plots these on the map.
 
+Predictions are run for both the expected flight parameters (i.e. predicted burst rate), but also for an 'abort' case (what would happen if the balloon burst *now*). These are both visible in the above screenshot: The orange trace is the expected flight path, and the red trace shows the abort flight path.
+
 OziPlotter has been one of the main reasons why Project Horus has had such a good track record of payload recovery, and we figured it's now about time we shared this software with the wider High-Altitude Ballooning community. We hope it will prove useful to other high-altitude ballooning projects. 
 
 ## Setup & Operation
@@ -21,7 +23,7 @@ NOTE: The documentation for OziPlotter is under development, and may not be comp
 
 1. [Dependencies](./doc/01_Dependencies.md)
 2. [Configuration](./doc/02_Configuration.md)
-3. [Inputs](./doc/03_Inputs.md)
+3. [Data Inputs](./doc/03_Inputs.md)
 4. [The Chase!](./doc/04_The_Chase.md)
 
 
