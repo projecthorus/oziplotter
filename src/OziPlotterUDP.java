@@ -57,7 +57,6 @@ public class OziPlotterUDP {
 	// Loads the configuration variables
 	//
 	public OziPlotterUDP(Properties configFile) {	
-		hostname = configFile.getProperty("HOSTNAME");
 		port = Integer.parseInt(configFile.getProperty("PORT"));
 		balloonTrack = Integer.parseInt(configFile.getProperty("PAYLOADTRACK"));
 		predictionTrack = Integer.parseInt(configFile.getProperty("PREDTRACK"));
@@ -123,8 +122,8 @@ public class OziPlotterUDP {
 		OziAPI.refreshMap();
 		
 		// Open the UDP Listener
-		System.out.println("Opening UDP Socket on Port 8942\r\n");
-		udpSource = new DatagramSocket(8942);
+		System.out.println("Opening UDP Socket\r\n");
+		udpSource = new DatagramSocket(port);
 		udpSource.setSoTimeout(udpTimeout*1000);
 		
 			

@@ -20,6 +20,7 @@ NOTE: The documentation for OziPlotter is under development, and may not be comp
 1. [Dependencies](./doc/01_Dependencies.md)
 2. [Configuration](./doc/02_Configuration.md)
 3. [Inputs](./doc/03_Inputs.md)
+4. [The Chase!](./doc/04_The_Chase.md)
 
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
