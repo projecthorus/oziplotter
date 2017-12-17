@@ -24,7 +24,6 @@ An example configuration for OziMux is provided in [ozimux.cfg.example](https://
 By default, OziMux listens for telemetry on the following UDP ports:
 * 55680 - Horus Ground Station
 * 55681 - Radiosonde Auto RX
-* 55682 - SondeMonitor Bridge (will eventually be removed, telemetry produced by sonde_to_habitat.py from [here](https://github.com/darksidelemm/sondemonitorUtils))
 * 55683 - Fldigi Bridge
 
 See below for more information on these data sources.
@@ -51,9 +50,9 @@ The port which HorusGroundStation sends data to is configured within [defaults.c
 ![Horus Ground Station Screenshot](https://raw.githubusercontent.com/projecthorus/oziplotter/master/doc/images/horusgroundstation.jpg)
 
 ## Radiosonde Auto RX
-Along with launching our own High Altitude balloons, we also go hunting radiosondes launched by the local Bureau of Meteorology. The ['auto_rx' radiosonde decoding software](https://github.com/darksidelemm/RS/tree/master/auto_rx) uses a RTLSDR to automatically search for radiosonde transmissions, decodes them, and plots data to APRS-IS and the [Habitat online tracker](http://tracker.habhub.org). It can also output data in OziPlotter compatible format!
+Along with launching our own High Altitude balloons, we also go hunting radiosondes launched by the local Bureau of Meteorology. The ['radiosonde_auto_rx' radiosonde decoding software](https://github.com/projecthorus/radiosonde_auto_rx/) uses a RTLSDR to automatically search for radiosonde transmissions, decodes them, and plots data to APRS-IS and the [Habitat online tracker](http://tracker.habhub.org). It can also output data in OziPlotter compatible format!
 
-The OziPlotter output must be enabled in the [auto_rx configuration file](https://github.com/darksidelemm/RS/blob/master/auto_rx/station.cfg.example#L85). As with the above applications, you can either push data directly to OziPlotter, or via OziMux. As auto_rx is intended to run on a standalone Raspberry Pi, you will need to specify both the destination IP address, and the destination UDP port (either 8942, or 55681, if sending via OziMux).
+The OziPlotter output must be enabled in the [auto_rx configuration file](https://github.com/projecthorus/radiosonde_auto_rx/wiki/Configuration-Settings). As with the above applications, you can either push data directly to OziPlotter, or via OziMux. As auto_rx is intended to run on a standalone Raspberry Pi, you will need to specify both the destination IP address, and the destination UDP port (either 8942, or 55681, if sending via OziMux).
 
 
 
