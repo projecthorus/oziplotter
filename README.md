@@ -1,5 +1,5 @@
 # OziPlotter - Project Horus's Offline Balloon Tracking System
-OziPlotter is an interface between [Project Horus's](www.areg.org.au/archives/category/activities/project-horus) ['Horus Ground Station'](https://github.com/projecthorus/HorusGroundStation) receiver utilities and the [OziExplorer](http://www.oziexplorer.com/au/) mapping software.
+OziPlotter is an interface between [Project Horus's](http://www.areg.org.au/archives/category/activities/project-horus) [Ground Station & Chase-Car Utilities](https://github.com/projecthorus/horus_utils) and the [OziExplorer](http://www.oziexplorer.com/au/) mapping software.
 OziPlotter was designed as a means of plotting balloon payload position & flight path predictions on a map, without requiring an internet connection. This is quite important when chasing balloons in remote areas of Australia!
 
 ![Chasing a radiosonde..](https://raw.githubusercontent.com/projecthorus/oziplotter/master/doc/images/sonde_chase.jpg)
@@ -21,10 +21,10 @@ Detailed setup & operation instructions are available within the 'doc' directory
 
 NOTE: The documentation for OziPlotter is under development, and may not be complete!
 
-1. [Dependencies](./doc/01_Dependencies.md)
-2. [Configuration](./doc/02_Configuration.md)
-3. [Data Inputs](./doc/03_Inputs.md)
-4. [The Chase!](./doc/04_The_Chase.md)
+1. [Dependencies](https://github.com/projecthorus/oziplotter/wiki/1---Dependencies)
+2. [Configuration](https://github.com/projecthorus/oziplotter/wiki/2---Configuration)
+3. [Data Sources](https://github.com/projecthorus/oziplotter/wiki/3---Data-Sources)
+4. [The Chase!](https://github.com/projecthorus/oziplotter/wiki/4---The-Chase!)
 
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
