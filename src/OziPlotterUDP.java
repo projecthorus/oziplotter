@@ -84,9 +84,10 @@ public class OziPlotterUDP {
 		
 		// Tracking vars
 		int lastAlt = 0;
-		int lastTime = 0;
-		int lastPredUpdate = 0;
-		int lastPredTime = 0;
+		long lastTime = 0;
+		long lastPayloadTime = 0;
+		long lastPredUpdate = 0;
+		long lastPredTime = 0;
 		boolean descent = false;
 
 		int telemetryTimer = 0;
@@ -96,8 +97,8 @@ public class OziPlotterUDP {
 		Predictor predictor = new Predictor(predictionAsc, predictionDesc, predictionBurst, predictionTrack, predictionColour, trackWidth);
    
 		// Startup
-		System.out.println("OziPlotter " + version + " Terry Baume & Mark Jessop, 2010-2017\r\n");
-		System.out.println("Project Horus (http://www.projecthorus.org)\r\n");
+		System.out.println("OziPlotter " + version + " Terry Baume & Mark Jessop, 2010-2018\r\n");
+		System.out.println("Project Horus / AREG (http://www.areg.org.au)\r\n");
                
         // Look for OziExplorer
         System.out.println("Looking for OziExplorer...");
@@ -177,7 +178,7 @@ public class OziPlotterUDP {
 					currentTime = (hour * 3600) + (minute * 60) + second;
 					
 					// Ascent rate
-					ascRate = Math.round((float)(alt - lastAlt)/(currentTime - lastTime) * 10.0)/10.0;
+					ascRate = Math.round((float)(alt - lastAlt)/(currentTime - lastPayloadTime) * 10.0)/10.0;
 					
 					// Play some beeps when the balloon first bursts
 					if (!descent && alt < (lastAlt - 100)) { beep(10); }
@@ -198,7 +199,8 @@ public class OziPlotterUDP {
 					
 					// Update tracking vars
 					lastAlt = alt;
-					lastTime = currentTime;
+					lastPayloadTime = currentTime;
+					lastTime = System.currentTimeMillis()/1000;
 
 					// Look for a valid fix
 					if (lat != 0 && lon != 0) {
@@ -215,7 +217,7 @@ public class OziPlotterUDP {
 						// Draw predictions?
 						if (lastTime - lastPredTime > predictionFrequency || lastPredTime > lastTime) {
 							predictor.runPredictions();
-							lastPredTime = lastTime;
+							lastPredTime = System.currentTimeMillis()/1000;
 						}
 						
 					} else {

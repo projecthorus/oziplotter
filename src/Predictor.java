@@ -175,6 +175,7 @@ public class Predictor {
 		new InputStreamHandler(errBuffer, errStream);
 		
 		// Some debug output
+		long start_time = System.currentTimeMillis()/1000;
 		if (descent) {
 			System.out.println("\nRunning predictor (descent mode):");
 		} else {
@@ -218,6 +219,9 @@ public class Predictor {
 		// Let the predictor run its course
 		predictor.waitFor();
 		System.out.println("Predictor Finished. Writing Oziexplorer Track.");
+
+		long stop_time = System.currentTimeMillis()/1000;
+		System.out.println("Prediction run time (s): " + (stop_time-start_time));
 		
 		// Clear any previous predictions & reset the track, delete waypoints from previous predictions
 		OziAPI.deleteWaypoint("BURST");
@@ -329,6 +333,8 @@ public class Predictor {
 		
 		// Set the abort track burst altitude to the current altitude plus 20 seconds of rise time.
 		int abortBurstAltitude = currentAltitude + (int)(60*ascRate);
+
+		long start_time = System.currentTimeMillis()/1000;
 	
 		// Fire up the predictor binary
 		Process predictor;
@@ -392,6 +398,9 @@ public class Predictor {
 		// Let the predictor run its course
 		predictor.waitFor();
 		System.out.println("Predictor Finished. Writing Abort Track.");
+
+		long stop_time = System.currentTimeMillis()/1000;
+		System.out.println("Prediction run time (s): " + (stop_time-start_time));
 		
 		// Clear any previous predictions & reset the track, delete waypoints from previous predictions
 		OziAPI.deleteWaypoint("ABORT");
