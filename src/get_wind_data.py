@@ -6,8 +6,14 @@
 #
 #   Download GRIB files and convert them to predict-compatible GFS files.
 #
+#   TODO:
+#    [ ] Use HTTP Range requests instead of using the GRIB filter.
+#
 import sys
 import os.path
+from os import remove
+import shutil
+from tempfile import mkdtemp
 import traceback
 import requests
 import argparse
@@ -19,10 +25,11 @@ from osgeo import gdal
 
 # GRIB Filter URL
 GRIB_FILTER_URL = "http://nomads.ncep.noaa.gov/cgi-bin/filter_gfs_%s.pl"
+# Temporary parallel FV3 Model URL
+#GRIB_FILTER_URL = "https://nomads.ncep.noaa.gov/cgi-bin/filter_fv3_gfs_%s.pl"
 
 # GFS Parameters we are interested in
-# TODO: Add additional levels available in the gfs 'B' model 
-# ( http://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrb2b.0p25.f006.shtml )
+# Note: There is also a new 0.4mb pressure level which we are not using yet.
 GFS_LEVELS = [1000.0,975.0,950.0,925.0,900.0,850.0,800.0,750.0,700.0,650.0,600.0,550.0,500.0,450.0,400.0,350.0,300.0,250.0,200.0,150.0,100.0,70.0,50.0,30.0,20.0,10.0,7.0,5.0,3.0,2.0,1.0]
 GFS_PARAMS = ['HGT', 'UGRD', 'VGRD']
 
@@ -38,7 +45,8 @@ VALID_MODELS = {
 }
 
 # Other Globals
-REQUEST_TIMEOUT = 30
+REQUEST_TIMEOUT = 60 # GRIB filter requests have been observed to take up to 60 seconds to complete...
+REQUEST_RETRIES = 10 # We often have to retry a LOT. 
 
 # Functions to Generate the GRIB Filter URL
 
@@ -79,7 +87,7 @@ def generate_filter_request(model='0p25_1hr',
 
     # Get latest model time
     _model_dt = model_dt
-    _model_timestring = _model_dt.strftime("%Y%m%d%H")
+    _model_timestring = _model_dt.strftime("%Y%m%d/%H")
     _model_hour = _model_dt.strftime("%H")
 
     _filter_url = GRIB_FILTER_URL % model
@@ -100,11 +108,14 @@ def generate_filter_request(model='0p25_1hr',
 
     # Add in the levels we want:
     for _level in GFS_LEVELS:
-        _filter_params['lev_%d_mb' % int(_level)] = 'on'
+        if _level%1.0 == 0.0:
+            _filter_params['lev_%d_mb' % int(_level)] = 'on'
+        else:
+            _filter_params['lev_%.1f_mb' % _level] = 'on'
 
 
-    logging.debug("Filter URL: %s" % _filter_url)
-    logging.debug("Filter Parameters: %s" % str(_filter_params))
+    #logging.debug("Filter URL: %s" % _filter_url)
+    #logging.debug("Filter Parameters: %s" % str(_filter_params))
 
     return (_filter_url, _filter_params)
 
@@ -120,7 +131,7 @@ def determine_latest_available_dataset(model='0p25_1hr', forecast_time=0):
     # if that fails, go to the next most recent, and continue until either we have data, or have completely failed.
     for _model_age in range(0,-5,-1):
         _model_dt = latest_model_name(_model_age)
-        _model_timestring = _model_dt.strftime("%Y%m%d%H")
+        _model_timestring = _model_dt.strftime("%Y%m%d/%H")
         logging.info("Testing Model: %s" % _model_timestring)
         (_url, _params) = generate_filter_request(
                                                 model=model,
@@ -131,12 +142,20 @@ def determine_latest_available_dataset(model='0p25_1hr', forecast_time=0):
                                                 latdelta=1.0,
                                                 londelta=1.0)
 
-        _r = requests.get(_url, params=_params, timeout=REQUEST_TIMEOUT)
-        if _r.status_code == requests.codes.ok:
-            logging.info("Found valid data in model %s!" % _model_timestring)
-            return _model_dt
-        else:
-            continue
+
+        _retries = REQUEST_RETRIES
+        while _retries > 0:
+            try:
+                _r = requests.get(_url, params=_params, timeout=REQUEST_TIMEOUT)
+                if _r.status_code == requests.codes.ok:
+                    logging.info("Found valid data in model %s!" % _model_timestring)
+                    return _model_dt
+                else:
+                    break
+            except Exception as e:
+                logging.error("Error when testing model, retrying: %s" % str(e))
+                _retries -= 1
+                continue
 
     logging.error("Could not find a model with the required data.")
     return None
@@ -155,7 +174,7 @@ def wait_for_newest_dataset(model='0p25_1hr', forecast_time=0, timeout=4*60):
     _start_time = time.time()
     while (time.time()-_start_time) < timeout*60:
         _model_dt = latest_model_name(0)
-        _model_timestring = _model_dt.strftime("%Y%m%d%H")
+        _model_timestring = _model_dt.strftime("%Y%m%d/%H")
         logging.info("Testing Model: %s" % _model_timestring)
         (_url, _params) = generate_filter_request(
                                                 model=model,
@@ -166,14 +185,23 @@ def wait_for_newest_dataset(model='0p25_1hr', forecast_time=0, timeout=4*60):
                                                 latdelta=1.0,
                                                 londelta=1.0)
 
-        _r = requests.get(_url, params=_params, timeout=REQUEST_TIMEOUT)
-        if _r.status_code == requests.codes.ok:
-            logging.info("Found valid data in model %s!" % _model_timestring)
-            return _model_dt
-        else:
-            logging.info("Model does not exist, or does not contain the required data yet. Waiting...")
-            time.sleep(120)
-            continue
+
+        _retries = REQUEST_RETRIES
+        while _retries > 0:
+            try:
+                _r = requests.get(_url, params=_params, timeout=REQUEST_TIMEOUT)
+                if _r.status_code == requests.codes.ok:
+                    logging.info("Found valid data in model %s!" % _model_timestring)
+                    return _model_dt
+                else:
+                    logging.info("Model does not exist, or does not contain the required data yet. Waiting...")
+                    time.sleep(120)
+                    break
+            except Exception as e:
+                logging.error("Error when testing model, retrying: %s" % str(e))
+                _retries -= 1
+                continue
+
 
     logging.error("Could not find a model with the required data within timeout period.")
     return None
@@ -182,16 +210,35 @@ def wait_for_newest_dataset(model='0p25_1hr', forecast_time=0, timeout=4*60):
 # Functions to poll the GRIB filter, and download data.
 def download_grib(url, params, filename="temp.grib"):
     ''' Attempt to download a GRIB file to disk '''
-    _r = requests.get(url, params=params, timeout=REQUEST_TIMEOUT)
+    _retries = REQUEST_RETRIES
 
-    if _r.status_code == requests.codes.ok:
-        # Writeout to disk.
-        f = open(filename, 'wb')
-        f.write(_r.content)
-        f.close()
-        return True
-    else:
-        return False
+    while _retries > 0:
+        try:
+            _start = time.time()
+            _r = requests.get(url, params=params, timeout=REQUEST_TIMEOUT)
+
+            # Return code is OK, write out to disk.
+            if _r.status_code == requests.codes.ok:
+                # Writeout to disk.
+                _duration = time.time() - _start
+                logging.info("GRIB request took %.1f seconds." % _duration)
+                f = open(filename, 'wb')
+                f.write(_r.content)
+                f.close()
+                return True
+            # Return status is something else...
+            else:
+                logging.error("Request returned error code: %s" % str(_r.status_code))
+                _retries -= 1
+                continue
+
+        except Exception as e:
+            logging.error("Request failed with error: %s" % str(e))
+            _retries -= 1
+            continue
+
+    logging.error("Attempt to download GRIB failed after %d retries." % retries)
+    return False
 
 
 # Functions to parse GRIB data using GDAL
@@ -284,7 +331,7 @@ def wind_dict_to_cusf(data, output_dir='./gfs/'):
             _pressures.append(_key)
 
     # Sort the list of pressures from highest to lowest
-    _pressures = np.flip(np.sort(_pressures),0)
+    _pressures = np.sort(_pressures)[::-1]
 
 
     # Build up the output file, section by section.
@@ -351,7 +398,27 @@ def wind_dict_to_cusf(data, output_dir='./gfs/'):
 
     return (_output_filename, output_text)
 
+# Copy a directory over another existing directory ( https://stackoverflow.com/a/12514470 )
+def copytree(src, dst, symlinks=False, ignore=None):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
 
+# Remove directory contents ( https://stackoverflow.com/a/185941 )
+def remove_dir_contents(_dir):
+    for file in os.listdir(_dir):
+        file_path = os.path.join(_dir, file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print(e)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -365,6 +432,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', action='store_true', default=False, help="Verbose output.")
     parser.add_argument('-o', '--output_dir', type=str, default='./gfs/', help='GFS data output directory.')
     parser.add_argument('--wait', type=int, default=0, help="Force use of the latest dataset, and wait up to X minutes for the data to become available.")
+    parser.add_argument('--override', action='store_true', default=False, help="Re-download data, even if there is existing data.")
     args = parser.parse_args()
 
     if args.verbose:
@@ -380,11 +448,21 @@ if __name__ == '__main__':
     if _model_dt == None:
         sys.exit(1)
 
-    # Write model name into dataset.txt
-    f = open(os.path.join(args.output_dir, "dataset.txt"), 'w')
-    f.write("%s" % _model_dt.strftime("%Y%m%d%Hz"))
-    f.close()
+    # Check for existing dataset
+    if os.path.exists(os.path.join(args.output_dir, "dataset.txt")):
+        with open(os.path.join(args.output_dir, "dataset.txt"), 'r') as f:
+            f_data = f.read().replace('\n', '')
+        logging.info("Found existing dataset %s", f_data)
+        _existing_model_dt = datetime.datetime.strptime(f_data, "%Y%m%d%Hz")
+        if( (_existing_model_dt >= _model_dt) and not args.override):
+            logging.info("No new data available")
+            sys.exit(0)
+        else:
+            logging.info("Downloading newer dataset %s" % _model_dt.strftime("%Y%m%d%Hz"))
 
+    # Create temporary directory for download
+    _temp_dir = mkdtemp()
+    logging.info("Created temporary directory %s" % _temp_dir)
     logging.info("Starting download of wind data...")
     
     # Get a list of valid forecast times, up until the user-specified time.
@@ -402,7 +480,7 @@ if __name__ == '__main__':
             londelta=args.londelta
             )
 
-        success = download_grib(url, params, filename='temp.grib')
+        success = download_grib(url, params, filename=os.path.join(_temp_dir, 'temp.grib'))
 
         if success:
             logging.info("Downloaded data for T+%03d" % forecast_time)
@@ -412,13 +490,32 @@ if __name__ == '__main__':
 
         # Now process the 
         logging.info("Processing GRIB file...")
-        _wind = parse_grib_to_dict('temp.grib')
+        _wind = parse_grib_to_dict(os.path.join(_temp_dir, 'temp.grib'))
+        remove(os.path.join(_temp_dir, 'temp.grib'))
 
         if _wind is not None:
-            (_filename, _text) = wind_dict_to_cusf(_wind, output_dir=args.output_dir)
+            (_filename, _text) = wind_dict_to_cusf(_wind, output_dir=_temp_dir)
             logging.info("GFS data written to: %s" % _filename)
         else:
             logging.error("Error processing GRIB file.")
+
+    # Clean out output directory if it already exists, create if it does not
+    if os.path.exists(args.output_dir):
+        remove_dir_contents(args.output_dir)
+    else:
+        os.mkdir(args.output_dir)
+
+    # Write model name into dataset.txt
+    logging.info("Writing out dataset info.")
+    f = open(os.path.join(_temp_dir, "dataset.txt"), 'w')
+    f.write("%s" % _model_dt.strftime("%Y%m%d%Hz"))
+    f.close()
+
+    # Copy temporary directory into output directory
+    copytree(_temp_dir, args.output_dir)
+
+    # Clean up temporary directory
+    shutil.rmtree(_temp_dir)
 
     logging.info("Finished!")
 
